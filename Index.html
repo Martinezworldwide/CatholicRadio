@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catholic Prayer Radio</title>
+</head>
+<body>
+    <h1>Catholic Prayer Radio</h1>
+    <div id="player">
+        <button id="playPauseButton">Play</button>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1">
+    </div>
+    <div id="prayerList">
+        <button onclick="setStream('https://example.com/stream1.mp3')">Daily Prayers</button>
+        <button onclick="setStream('https://example.com/stream2.mp3')">Spiritual Warfare</button>
+        <button onclick="setStream('https://example.com/stream3.mp3')">Meditative Music</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
