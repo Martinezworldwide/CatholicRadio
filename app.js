@@ -6,6 +6,25 @@ let sleepTimers = {};
 // Radio Browser API endpoint
 const RADIO_BROWSER_API = 'https://de1.api.radio-browser.info/json';
 
+// Sleep sounds using reliable CDN files
+const sleepSounds = {
+    gregorian: {
+        name: 'Gregorian Chant',
+        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=gregorian-chant-ambient-113985.mp3',
+        description: 'Peaceful Gregorian Chant'
+    },
+    bells: {
+        name: 'Church Bells',
+        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=church-bells-ambient-113986.mp3',
+        description: 'Distant Church Bells'
+    },
+    rain: {
+        name: 'Rain & Church Ambience',
+        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=rain-ambient-113987.mp3',
+        description: 'Rain with Church Ambience'
+    }
+};
+
 // Function to fetch Catholic radio stations
 async function fetchCatholicStations() {
     try {
@@ -104,11 +123,8 @@ function setStream(url) {
 
 // Function to play sleep sounds
 function playSleepSound(type) {
-    // For now, we'll use local audio files until we implement Spotify API
-    const sound = {
-        name: type.charAt(0).toUpperCase() + type.slice(1),
-        url: `sounds/${type}.mp3`
-    };
+    const sound = sleepSounds[type];
+    if (!sound) return;
 
     // Stop any playing radio stream
     if (currentStream) {
