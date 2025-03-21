@@ -3,20 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catholic Prayer Radio</title>
+    <title>Catholic Sleep Radio</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Catholic Prayer Radio</h1>
-    <div id="player">
-        <button id="playPauseButton">Play</button>
-        <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1">
-    </div>
-    <div id="prayerList">
-        <button onclick="setStream('https://ewtn-ice.streamguys1.com/ewtn-audio-english')">EWTN</button>
-        <button onclick="setStream('https://relevantradio.streamguys1.com/rrnet-mp3-64')">Relevant Radio</button>
-        <button onclick="setStream('https://avemariaradio.streamguys1.com/amr-mp3-64')">Ave Maria Radio</button>
+    <div class="container">
+        <header>
+            <h1>Catholic Sleep Radio</h1>
+            <p class="subtitle">Prayer, Music, and Peaceful Sounds for Your Soul</p>
+        </header>
+
+        <main>
+            <section class="player-section">
+                <div id="player">
+                    <div class="now-playing">
+                        <span id="currentStation">Select a station</span>
+                    </div>
+                    <div class="controls">
+                        <button id="playPauseButton" class="btn-primary">Play</button>
+                        <div class="volume-control">
+                            <span>Volume</span>
+                            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.5">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stations-section">
+                <h2>Live Catholic Radio</h2>
+                <div id="prayerList" class="station-grid">
+                    <button onclick="setStream('ewtn')" class="station-btn">
+                        <span class="station-name">EWTN</span>
+                        <span class="station-desc">Eternal Word Television Network</span>
+                    </button>
+                    <button onclick="setStream('relevant')" class="station-btn">
+                        <span class="station-name">Relevant Radio</span>
+                        <span class="station-desc">Relevant Radio Network</span>
+                    </button>
+                    <button onclick="setStream('avemaria')" class="station-btn">
+                        <span class="station-name">Ave Maria Radio</span>
+                        <span class="station-desc">Ave Maria Radio Network</span>
+                    </button>
+                    <button onclick="setStream('radiopax')" class="station-btn">
+                        <span class="station-name">Radio Pax</span>
+                        <span class="station-desc">Radio Pax Catholic Radio</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="sleep-section">
+                <h2>Sleep Sounds & Music</h2>
+                <div class="sleep-grid">
+                    <div class="sleep-item">
+                        <h3>Gregorian Chant</h3>
+                        <p class="sound-desc">Peaceful Gregorian Chant</p>
+                        <button onclick="playSleepSound('gregorian')" class="sleep-btn">Play</button>
+                        <div class="timer-control">
+                            <input type="number" id="gregorianTimer" min="1" max="120" value="30" placeholder="Minutes">
+                            <button onclick="setTimer('gregorian')" class="timer-btn">Set Timer</button>
+                        </div>
+                    </div>
+                    <div class="sleep-item">
+                        <h3>Church Bells</h3>
+                        <p class="sound-desc">Distant Church Bells</p>
+                        <button onclick="playSleepSound('bells')" class="sleep-btn">Play</button>
+                        <div class="timer-control">
+                            <input type="number" id="bellsTimer" min="1" max="120" value="30" placeholder="Minutes">
+                            <button onclick="setTimer('bells')" class="timer-btn">Set Timer</button>
+                        </div>
+                    </div>
+                    <div class="sleep-item">
+                        <h3>Rain & Church Ambience</h3>
+                        <p class="sound-desc">Rain with Church Ambience</p>
+                        <button onclick="playSleepSound('rain')" class="sleep-btn">Play</button>
+                        <div class="timer-control">
+                            <input type="number" id="rainTimer" min="1" max="120" value="30" placeholder="Minutes">
+                            <button onclick="setTimer('rain')" class="timer-btn">Set Timer</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>For prayer and peaceful rest</p>
+        </footer>
     </div>
     <script src="app.js"></script>
 </body>
