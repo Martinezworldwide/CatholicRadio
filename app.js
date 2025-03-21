@@ -7,22 +7,22 @@ let sleepTimers = {};
 const radioStations = {
     ewtn: {
         name: 'EWTN',
-        url: 'https://stream.ewtn.com/ewtn-audio-english',
+        url: 'https://ewtn-ice.streamguys1.com/ewtn-audio-english',
         description: 'Eternal Word Television Network'
     },
     relevant: {
         name: 'Relevant Radio',
-        url: 'https://stream.relevantradio.com/relevantradio',
+        url: 'https://relevantradio.streamguys1.com/rrnet-mp3-64',
         description: 'Relevant Radio Network'
     },
     avemaria: {
         name: 'Ave Maria Radio',
-        url: 'https://stream.avemariaradio.net/amr-mp3-64',
+        url: 'https://avemariaradio.streamguys1.com/amr-mp3-64',
         description: 'Ave Maria Radio Network'
     },
     radiopax: {
         name: 'Radio Pax',
-        url: 'https://stream.radiopax.com/radiopax-mp3-64',
+        url: 'https://radiopax.streamguys1.com/radiopax-mp3-64',
         description: 'Radio Pax Catholic Radio'
     }
 };
@@ -31,17 +31,17 @@ const radioStations = {
 const sleepSounds = {
     gregorian: {
         name: 'Gregorian Chant',
-        url: 'https://www2.cs.uic.edu/~i101/SoundFiles/Gregorian.mp3',
+        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=gregorian-chant-ambient-113985.mp3',
         description: 'Peaceful Gregorian Chant'
     },
     bells: {
         name: 'Church Bells',
-        url: 'https://www2.cs.uic.edu/~i101/SoundFiles/churchbells.mp3',
+        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=church-bells-ambient-113986.mp3',
         description: 'Distant Church Bells'
     },
     rain: {
         name: 'Rain & Church Ambience',
-        url: 'https://www2.cs.uic.edu/~i101/SoundFiles/rain.mp3',
+        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=rain-ambient-113987.mp3',
         description: 'Rain with Church Ambience'
     }
 };
@@ -54,6 +54,14 @@ document.getElementById('playPauseButton').addEventListener('click', () => {
     } else if (currentStream) {
         currentStream.play();
         document.getElementById('playPauseButton').innerText = 'Pause';
+    } else if (currentSleepSound) {
+        if (currentSleepSound.playing()) {
+            currentSleepSound.pause();
+            document.getElementById('playPauseButton').innerText = 'Play';
+        } else {
+            currentSleepSound.play();
+            document.getElementById('playPauseButton').innerText = 'Pause';
+        }
     }
 });
 
