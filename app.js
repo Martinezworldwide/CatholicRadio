@@ -3,48 +3,34 @@ let currentStream = null;
 let currentSleepSound = null;
 let sleepTimers = {};
 
-// Free Catholic Radio Stations with reliable streams
-const radioStations = {
-    ewtn: {
-        name: 'EWTN',
-        url: 'https://ewtn-ice.streamguys1.com/ewtn-audio-english',
-        description: 'Eternal Word Television Network'
-    },
-    relevant: {
-        name: 'Relevant Radio',
-        url: 'https://relevantradio.streamguys1.com/rrnet-mp3-64',
-        description: 'Relevant Radio Network'
-    },
-    avemaria: {
-        name: 'Ave Maria Radio',
-        url: 'https://avemariaradio.streamguys1.com/amr-mp3-64',
-        description: 'Ave Maria Radio Network'
-    },
-    radiopax: {
-        name: 'Radio Pax',
-        url: 'https://radiopax.streamguys1.com/radiopax-mp3-64',
-        description: 'Radio Pax Catholic Radio'
-    }
-};
+// Radio Browser API endpoint
+const RADIO_BROWSER_API = 'https://de1.api.radio-browser.info/json';
 
-// Sleep sounds using direct MP3 files
-const sleepSounds = {
-    gregorian: {
-        name: 'Gregorian Chant',
-        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=gregorian-chant-ambient-113985.mp3',
-        description: 'Peaceful Gregorian Chant'
-    },
-    bells: {
-        name: 'Church Bells',
-        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=church-bells-ambient-113986.mp3',
-        description: 'Distant Church Bells'
-    },
-    rain: {
-        name: 'Rain & Church Ambience',
-        url: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=rain-ambient-113987.mp3',
-        description: 'Rain with Church Ambience'
+// Function to fetch Catholic radio stations
+async function fetchCatholicStations() {
+    try {
+        const response = await fetch(`${RADIO_BROWSER_API}/stations/search?tag=catholic&limit=10`);
+        const stations = await response.json();
+        
+        // Update the stations grid
+        const stationsGrid = document.getElementById('prayerList');
+        stationsGrid.innerHTML = ''; // Clear existing stations
+        
+        stations.forEach(station => {
+            const button = document.createElement('button');
+            button.className = 'station-btn';
+            button.innerHTML = `
+                <span class="station-name">${station.name}</span>
+                <span class="station-desc">${station.country || 'International'}</span>
+            `;
+            button.onclick = () => setStream(station.url);
+            stationsGrid.appendChild(button);
+        });
+    } catch (error) {
+        console.error('Error fetching stations:', error);
+        alert('Error loading radio stations. Please try again.');
     }
-};
+}
 
 // Function to handle play/pause button click
 document.getElementById('playPauseButton').addEventListener('click', () => {
@@ -76,10 +62,7 @@ document.getElementById('volumeControl').addEventListener('input', (e) => {
 });
 
 // Function to set the audio stream URL
-function setStream(stationId) {
-    const station = radioStations[stationId];
-    if (!station) return;
-
+function setStream(url) {
     // Stop any playing sleep sounds
     if (currentSleepSound) {
         currentSleepSound.stop();
@@ -92,13 +75,13 @@ function setStream(stationId) {
     }
 
     // Show loading state
-    document.getElementById('currentStation').textContent = `Loading ${station.name}...`;
+    document.getElementById('currentStation').textContent = 'Loading station...';
     document.getElementById('playPauseButton').innerText = 'Loading...';
     document.getElementById('playPauseButton').disabled = true;
 
     // Create new stream with error handling
     currentStream = new Howl({
-        src: [station.url],
+        src: [url],
         html5: true,
         volume: document.getElementById('volumeControl').value,
         onloaderror: function(id, error) {
@@ -113,7 +96,7 @@ function setStream(stationId) {
             document.getElementById('playPauseButton').innerText = 'Play';
         },
         onplay: function() {
-            document.getElementById('currentStation').textContent = `Now Playing: ${station.name}`;
+            document.getElementById('currentStation').textContent = 'Now Playing';
             document.getElementById('playPauseButton').innerText = 'Pause';
         }
     });
@@ -121,8 +104,11 @@ function setStream(stationId) {
 
 // Function to play sleep sounds
 function playSleepSound(type) {
-    const sound = sleepSounds[type];
-    if (!sound) return;
+    // For now, we'll use local audio files until we implement Spotify API
+    const sound = {
+        name: type.charAt(0).toUpperCase() + type.slice(1),
+        url: `sounds/${type}.mp3`
+    };
 
     // Stop any playing radio stream
     if (currentStream) {
@@ -192,3 +178,6 @@ function setTimer(type) {
 
 // Initialize volume to 50%
 document.getElementById('volumeControl').value = 0.5;
+
+// Fetch stations when the page loads
+fetchCatholicStations();
