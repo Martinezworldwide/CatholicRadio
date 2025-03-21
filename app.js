@@ -3,45 +3,45 @@ let currentStream = null;
 let currentSleepSound = null;
 let sleepTimers = {};
 
-// Free Catholic Radio Stations
+// Free Catholic Radio Stations with reliable streams
 const radioStations = {
     ewtn: {
         name: 'EWTN',
-        url: 'https://ewtn-ice.streamguys1.com/ewtn-audio-english',
+        url: 'https://stream.ewtn.com/ewtn-audio-english',
         description: 'Eternal Word Television Network'
     },
     relevant: {
         name: 'Relevant Radio',
-        url: 'https://relevantradio.streamguys1.com/rrnet-mp3-64',
+        url: 'https://stream.relevantradio.com/relevantradio',
         description: 'Relevant Radio Network'
     },
     avemaria: {
         name: 'Ave Maria Radio',
-        url: 'https://avemariaradio.streamguys1.com/amr-mp3-64',
+        url: 'https://stream.avemariaradio.net/amr-mp3-64',
         description: 'Ave Maria Radio Network'
     },
     radiopax: {
         name: 'Radio Pax',
-        url: 'https://radiopax.streamguys1.com/radiopax-mp3-64',
+        url: 'https://stream.radiopax.com/radiopax-mp3-64',
         description: 'Radio Pax Catholic Radio'
     }
 };
 
-// Sleep sounds using Freesound API
+// Sleep sounds using direct MP3 files
 const sleepSounds = {
     gregorian: {
         name: 'Gregorian Chant',
-        url: 'https://cdn.freesound.org/previews/415/415_5121236-lq.mp3',
+        url: 'https://www2.cs.uic.edu/~i101/SoundFiles/Gregorian.mp3',
         description: 'Peaceful Gregorian Chant'
     },
     bells: {
         name: 'Church Bells',
-        url: 'https://cdn.freesound.org/previews/415/415_5121236-lq.mp3',
+        url: 'https://www2.cs.uic.edu/~i101/SoundFiles/churchbells.mp3',
         description: 'Distant Church Bells'
     },
     rain: {
         name: 'Rain & Church Ambience',
-        url: 'https://cdn.freesound.org/previews/415/415_5121236-lq.mp3',
+        url: 'https://www2.cs.uic.edu/~i101/SoundFiles/rain.mp3',
         description: 'Rain with Church Ambience'
     }
 };
@@ -83,23 +83,32 @@ function setStream(stationId) {
         currentStream.unload();
     }
 
-    // Create new stream
+    // Show loading state
+    document.getElementById('currentStation').textContent = `Loading ${station.name}...`;
+    document.getElementById('playPauseButton').innerText = 'Loading...';
+    document.getElementById('playPauseButton').disabled = true;
+
+    // Create new stream with error handling
     currentStream = new Howl({
         src: [station.url],
         html5: true,
         volume: document.getElementById('volumeControl').value,
         onloaderror: function(id, error) {
             console.error('Error loading stream:', error);
+            document.getElementById('currentStation').textContent = 'Error loading stream';
+            document.getElementById('playPauseButton').innerText = 'Error';
+            document.getElementById('playPauseButton').disabled = false;
             alert('Error loading radio stream. Please try again.');
+        },
+        onload: function() {
+            document.getElementById('playPauseButton').disabled = false;
+            document.getElementById('playPauseButton').innerText = 'Play';
         },
         onplay: function() {
             document.getElementById('currentStation').textContent = `Now Playing: ${station.name}`;
             document.getElementById('playPauseButton').innerText = 'Pause';
         }
     });
-
-    // Start playing
-    currentStream.play();
 }
 
 // Function to play sleep sounds
@@ -118,7 +127,12 @@ function playSleepSound(type) {
         currentSleepSound.stop();
     }
 
-    // Create new sleep sound
+    // Show loading state
+    document.getElementById('currentStation').textContent = `Loading ${sound.name}...`;
+    document.getElementById('playPauseButton').innerText = 'Loading...';
+    document.getElementById('playPauseButton').disabled = true;
+
+    // Create new sleep sound with error handling
     currentSleepSound = new Howl({
         src: [sound.url],
         html5: true,
@@ -126,16 +140,20 @@ function playSleepSound(type) {
         loop: true,
         onloaderror: function(id, error) {
             console.error('Error loading sleep sound:', error);
+            document.getElementById('currentStation').textContent = 'Error loading sound';
+            document.getElementById('playPauseButton').innerText = 'Error';
+            document.getElementById('playPauseButton').disabled = false;
             alert('Error loading sleep sound. Please try again.');
+        },
+        onload: function() {
+            document.getElementById('playPauseButton').disabled = false;
+            document.getElementById('playPauseButton').innerText = 'Play';
         },
         onplay: function() {
             document.getElementById('currentStation').textContent = `Now Playing: ${sound.name}`;
             document.getElementById('playPauseButton').innerText = 'Pause';
         }
     });
-
-    // Start playing
-    currentSleepSound.play();
 }
 
 // Function to set timer for sleep sounds
