@@ -3,79 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Catholic Sleep Radio — live Catholic stations and peaceful sleep sounds">
     <title>Catholic Sleep Radio</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- hls.js for HLS (.m3u8) stream support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Animated background grid -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
     <div class="container">
-        <header>
-            <h1>Catholic Sleep Radio</h1>
-            <p class="subtitle">Prayer, Music, and Peaceful Sounds for Your Soul</p>
+        <header class="site-header">
+            <div class="header-top">
+                <span id="statusBadge" class="status-badge status-scanning">INITIALIZING</span>
+                <span id="liveClock" class="live-clock">--:--:--</span>
+            </div>
+            <h1>
+                <span class="title-accent">◈</span>
+                Catholic Sleep Radio
+                <span class="title-accent">◈</span>
+            </h1>
+            <p class="subtitle">Live Catholic Broadcasts · Ambient Sleep Frequencies</p>
         </header>
 
         <main>
+            <!-- High-tech player deck -->
             <section class="player-section">
-                <div id="player">
+                <div id="player" class="player-deck">
+                    <!-- Audio visualizer bars -->
+                    <div id="visualizer" class="visualizer" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+
                     <div class="now-playing">
-                        <span id="currentStation">Select a station</span>
+                        <span id="currentStation" class="track-title">Select a station or sleep sound</span>
+                        <span id="stationMeta" class="track-meta">Ready</span>
                     </div>
+
+                    <div id="timerDisplay" class="timer-display"></div>
+
                     <div class="controls">
-                        <button id="playPauseButton" class="btn-primary">Play</button>
-                        <div class="volume-control">
-                            <span>Volume</span>
-                            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.5">
-                        </div>
+                        <button id="prevButton" class="ctrl-btn" title="Previous station">⏮</button>
+                        <button id="playPauseButton" class="ctrl-btn ctrl-play">▶ PLAY</button>
+                        <button id="nextButton" class="ctrl-btn" title="Next station">⏭</button>
+                    </div>
+
+                    <div class="volume-control">
+                        <span class="volume-label">VOL</span>
+                        <input type="range" id="volumeControl" min="0" max="1" step="0.05" value="0.5" aria-label="Volume">
+                        <span id="volumeValue" class="volume-value">50%</span>
                     </div>
                 </div>
             </section>
 
+            <!-- Live stations -->
             <section class="stations-section">
-                <h2>Live Catholic Radio</h2>
+                <div class="section-header">
+                    <h2>Live Catholic Radio</h2>
+                    <span id="stationCount" class="station-count">0 STATIONS</span>
+                </div>
+
+                <div class="search-bar">
+                    <span class="search-icon">⌕</span>
+                    <input type="search" id="stationSearch" placeholder="Search stations by name, country, or format..." autocomplete="off">
+                </div>
+
                 <div id="prayerList" class="station-grid">
-                    <!-- Stations will be loaded dynamically -->
+                    <!-- Stations loaded dynamically -->
                 </div>
             </section>
 
+            <!-- Sleep sounds -->
             <section class="sleep-section">
-                <h2>Sleep Sounds & Music</h2>
-                <div class="sleep-grid">
-                    <div class="sleep-item">
-                        <h3>Gregorian Chant</h3>
-                        <p class="sound-desc">Peaceful Gregorian Chant</p>
-                        <button onclick="playSleepSound('gregorian')" class="sleep-btn">Play</button>
-                        <div class="timer-control">
-                            <input type="number" id="gregorianTimer" min="1" max="120" value="30" placeholder="Minutes">
-                            <button onclick="setTimer('gregorian')" class="timer-btn">Set Timer</button>
-                        </div>
-                    </div>
-                    <div class="sleep-item">
-                        <h3>Church Bells</h3>
-                        <p class="sound-desc">Distant Church Bells</p>
-                        <button onclick="playSleepSound('bells')" class="sleep-btn">Play</button>
-                        <div class="timer-control">
-                            <input type="number" id="bellsTimer" min="1" max="120" value="30" placeholder="Minutes">
-                            <button onclick="setTimer('bells')" class="timer-btn">Set Timer</button>
-                        </div>
-                    </div>
-                    <div class="sleep-item">
-                        <h3>Rain & Church Ambience</h3>
-                        <p class="sound-desc">Rain with Church Ambience</p>
-                        <button onclick="playSleepSound('rain')" class="sleep-btn">Play</button>
-                        <div class="timer-control">
-                            <input type="number" id="rainTimer" min="1" max="120" value="30" placeholder="Minutes">
-                            <button onclick="setTimer('rain')" class="timer-btn">Set Timer</button>
-                        </div>
-                    </div>
+                <div class="section-header">
+                    <h2>Sleep Frequencies</h2>
+                    <span class="section-tag">AMBIENT · LOOP · TIMER</span>
+                </div>
+                <div id="sleepGrid" class="sleep-grid">
+                    <!-- Sleep sounds loaded dynamically -->
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>For prayer and peaceful rest</p>
+            <p>For prayer, rest, and peaceful sleep</p>
+            <p class="footer-tech">Powered by Radio Browser API · hls.js · HTML5 Audio</p>
         </footer>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
