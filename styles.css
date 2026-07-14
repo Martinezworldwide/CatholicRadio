@@ -924,3 +924,158 @@ h2 {
         border-radius: var(--radius);
     }
 }
+
+/* ─── Theme toggle button ─── */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--marble-white);
+    border: 1px solid var(--stone-mid);
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.theme-toggle:hover {
+    border-color: var(--gold);
+    color: var(--burgundy);
+}
+
+.theme-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.theme-icon-dark {
+    display: none;
+}
+
+[data-theme="dark"] .theme-icon-light {
+    display: none;
+}
+
+[data-theme="dark"] .theme-icon-dark {
+    display: inline;
+}
+
+/* ─── Night mode — candlelit cathedral ─── */
+[data-theme="dark"] {
+    --stone-cream: #141110;
+    --stone-warm: #1c1815;
+    --stone-mid: #3a342e;
+    --stone-dark: #6a6258;
+    --marble-white: #221e1a;
+
+    --burgundy: #6b3050;
+    --burgundy-deep: #120810;
+    --burgundy-light: #8a4568;
+
+    --gold: #c9a040;
+    --gold-light: #dfc06a;
+    --gold-pale: #3d3528;
+
+    --glass-blue: #4a7098;
+    --glass-ruby: #a05068;
+    --glass-amethyst: #7860a0;
+    --glass-emerald: #4a8870;
+
+    --text-primary: #ede8e0;
+    --text-secondary: #b8afa3;
+    --text-light: #f7f3ec;
+    --text-muted: #8a8278;
+
+    --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.35);
+    --shadow-deep: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .cathedral-bg {
+    background:
+        radial-gradient(ellipse 70% 45% at 50% 0%, rgba(201, 160, 64, 0.07) 0%, transparent 55%),
+        linear-gradient(180deg, #0e0c0a 0%, #141110 45%, #1a1614 100%);
+}
+
+[data-theme="dark"] .cathedral-bg::after {
+    opacity: 0.15;
+}
+
+[data-theme="dark"] .stained-light {
+    opacity: 0.14;
+}
+
+[data-theme="dark"] .vault-overlay {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, transparent 100%);
+}
+
+[data-theme="dark"] .gothic-arch-frame::before {
+    background: linear-gradient(180deg, rgba(30, 20, 25, 0.8) 0%, transparent 100%);
+    border-color: var(--gold);
+}
+
+[data-theme="dark"] h1 {
+    color: var(--gold-light);
+    background: none;
+    -webkit-text-fill-color: var(--gold-light);
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: var(--marble-white);
+    border-color: var(--stone-mid);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .chapel-panel {
+    background: var(--marble-white);
+    border-color: var(--stone-mid);
+}
+
+[data-theme="dark"] .station-btn {
+    background: var(--stone-warm);
+    border-color: var(--stone-mid);
+}
+
+[data-theme="dark"] .station-btn:hover,
+[data-theme="dark"] .station-btn.active {
+    background: #2a2520;
+}
+
+[data-theme="dark"] .station-name {
+    color: var(--gold-light);
+}
+
+[data-theme="dark"] #stationSearch {
+    background: var(--stone-warm);
+    border-color: var(--stone-mid);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .sleep-item {
+    background: var(--stone-warm);
+    border-color: var(--stone-mid);
+}
+
+[data-theme="dark"] .site-header,
+[data-theme="dark"] .site-footer {
+    border-color: var(--stone-mid);
+}
+
+[data-theme="dark"] .column {
+    background: linear-gradient(90deg, #2a2520, #3a342e, #2a2520);
+}
+
+[data-theme="dark"] .header-meta {
+    max-width: 560px;
+}
+
+@media (max-width: 768px) {
+    .header-meta {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+}

@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Catholic Sleep Radio — live Catholic stations and peaceful sleep sounds">
     <title>Catholic Sleep Radio</title>
+    <!-- Apply saved theme before paint to prevent flash -->
+    <script>
+        (function () {
+            var saved = localStorage.getItem('csr-theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var theme = saved || (prefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="styles.css">
     <!-- hls.js for HLS (.m3u8) stream support -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
@@ -34,6 +43,11 @@
 
             <div class="header-meta">
                 <span id="statusBadge" class="status-badge status-scanning">Tuning...</span>
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle light / night mode">
+                    <span class="theme-icon theme-icon-light" aria-hidden="true">☀</span>
+                    <span class="theme-icon theme-icon-dark" aria-hidden="true">☽</span>
+                    <span class="theme-label">Night Mode</span>
+                </button>
                 <span id="liveClock" class="live-clock">--:--:--</span>
             </div>
 

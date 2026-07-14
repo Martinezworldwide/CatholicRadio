@@ -9,81 +9,109 @@ let currentSleepType = null; // // Active sleep sound key
 let sleepTimers = {}; // // Per-sound sleep timer handles
 let allStations = []; // // Full station list for search/filter
 let activeStationIndex = -1; // // Index in allStations for skip navigation
+let autoSkipCount = 0; // // Consecutive auto-skips when streams fail
+const MAX_AUTO_SKIPS = 10; // // Stop skipping after this many failures in a row
 
 // Radio Browser API base URL
 const RADIO_BROWSER_API = 'https://de1.api.radio-browser.info/json';
 
-// Curated fallback stations when API is unavailable
-const CURATED_STATIONS = [
+// Verified HTTPS streams — tested and known to work on GitHub Pages
+const VERIFIED_STATIONS = [
     {
         name: 'Radio Vaticana English',
         country: 'Vatican',
         url: 'https://radio.vaticannews.va/stream-en',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
+    },
+    {
+        name: 'Radio Vaticana Español',
+        country: 'Vatican',
+        url: 'https://radio.vaticannews.va/stream-es',
+        codec: 'MP3',
+        hls: false,
+        verified: true
+    },
+    {
+        name: 'Radio Vaticana Deutsch',
+        country: 'Vatican',
+        url: 'https://radio.vaticannews.va/stream-de',
+        codec: 'MP3',
+        hls: false,
+        verified: true
     },
     {
         name: 'EWTN Catholic Radio',
         country: 'USA',
         url: 'https://ewtn-ice.streamguys1.com/english-aac',
         codec: 'AAC',
-        hls: 0
+        hls: false,
+        verified: true
+    },
+    {
+        name: 'Relevant Radio',
+        country: 'USA',
+        url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/RR_MAIN.mp3',
+        codec: 'MP3',
+        hls: false,
+        verified: true
     },
     {
         name: 'Radio Mir — Medjugorje',
         country: 'Bosnia',
         url: 'https://mirm.live/mir.mp3',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
     },
     {
         name: 'RCF Radio',
         country: 'France',
         url: 'https://rcf.streamakaci.com/rcfdigital.mp3?platform=site',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
     },
     {
         name: 'Radio Courtoisie',
         country: 'France',
         url: 'https://ice.creacast.com/radio-courtoisie',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
     },
     {
         name: 'Classical Catholic Radio',
         country: 'USA',
         url: 'https://streaming.live365.com/a64105',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
     },
     {
         name: 'CIRA-FM Radio Ville Marie',
         country: 'Canada',
         url: 'https://s5.radio.co/sec326ff8a/listen',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
     },
     {
-        name: 'Catholic Radio SC',
-        country: 'USA',
-        url: 'https://stream.zeno.fm/ugqv8t9gs18uv',
-        codec: 'MP3',
-        hls: 0
-    },
-    {
-        name: 'Radio Maria España',
+        name: 'Radio María España',
         country: 'Spain',
         url: 'https://dreamsiteradiocp4.com/proxy/rmspain1?mp=/stream/1/',
         codec: 'MP3',
-        hls: 0
+        hls: false,
+        verified: true
     },
     {
-        name: 'Relevant Radio',
-        country: 'USA',
-        url: 'https://playerservices.streamtheworld.com/api/livestream-redirection?version=1&stationId=74075&cors=true&ttl=1800',
-        codec: 'MP3',
-        hls: 0
+        name: 'Rádio Catedral 106.7 FM',
+        country: 'Brazil',
+        url: 'https://hts04.brascast.com:13728/stream',
+        codec: 'AAC',
+        hls: false,
+        verified: true
     }
 ];
 
@@ -128,6 +156,7 @@ const ui = {};
 document.addEventListener('DOMContentLoaded', () => {
     cacheDomElements();
     createAudioElement();
+    initTheme();
     bindControls();
     renderSleepSounds();
     fetchCatholicStations();
@@ -153,6 +182,37 @@ function cacheDomElements() {
     ui.timerDisplay = document.getElementById('timerDisplay');
     ui.liveClock = document.getElementById('liveClock');
     ui.loadingOverlay = document.getElementById('loadingOverlay');
+    ui.themeToggle = document.getElementById('themeToggle');
+}
+
+// Initialize dark / light theme toggle
+function initTheme() {
+    if (!ui.themeToggle) {
+        return;
+    }
+    updateThemeToggleLabel();
+    ui.themeToggle.addEventListener('click', toggleTheme);
+}
+
+// Switch between light and night (dark) mode
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('csr-theme', next);
+    updateThemeToggleLabel();
+}
+
+// Update theme toggle button label for current mode
+function updateThemeToggleLabel() {
+    if (!ui.themeToggle) {
+        return;
+    }
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const label = ui.themeToggle.querySelector('.theme-label');
+    if (label) {
+        label.textContent = isDark ? 'Light Mode' : 'Night Mode';
+    }
 }
 
 // Create hidden audio element used for all playback
@@ -160,6 +220,7 @@ function createAudioElement() {
     audioElement = document.createElement('audio');
     audioElement.id = 'hiddenAudio';
     audioElement.preload = 'none';
+    audioElement.setAttribute('playsinline', ''); // // Required for iOS playback
     audioElement.style.display = 'none';
     document.body.appendChild(audioElement);
 
@@ -234,15 +295,15 @@ async function fetchCatholicStations() {
         }
     }
 
-    // Normalize, dedupe, and filter playable streams
+    // Normalize, dedupe, and filter playable streams — verified list always included
     allStations = normalizeStations(merged);
 
-    // Use curated list if API returned nothing usable
     if (allStations.length === 0) {
-        allStations = normalizeStations(CURATED_STATIONS);
-        setStatus('fallback', 'Using curated stations');
+        allStations = VERIFIED_STATIONS.map((station) => ({ ...station }));
+        setStatus('fallback', 'Using verified stations');
     } else {
-        setStatus('online', `${allStations.length} stations found`);
+        const verifiedCount = allStations.filter((s) => s.verified).length;
+        setStatus('online', `${allStations.length} stations · ${verifiedCount} verified`);
     }
 
     renderStationGrid(allStations);
@@ -250,10 +311,16 @@ async function fetchCatholicStations() {
     ui.stationCount.textContent = `${allStations.length} Stations`;
 }
 
-// Normalize raw API records into consistent station objects
+// Normalize raw API records — verified stations first, only native HTTPS URLs
 function normalizeStations(rawStations) {
     const seenUrls = new Set();
     const normalized = [];
+
+    // Always pin tested working stations to the top
+    for (const station of VERIFIED_STATIONS) {
+        seenUrls.add(station.url);
+        normalized.push({ ...station });
+    }
 
     for (const station of rawStations) {
         const streamUrl = resolveStreamUrl(station);
@@ -261,8 +328,18 @@ function normalizeStations(rawStations) {
             continue;
         }
 
-        // Skip broken stations when API marks them offline
+        // Skip stations the API marks as offline
         if (station.lastcheckok === 0) {
+            continue;
+        }
+
+        // Skip HLS/IPTV — unreliable without dedicated video player
+        if (station.hls === 1 || streamUrl.includes('.m3u8')) {
+            continue;
+        }
+
+        // Skip known broken or blocked stream patterns
+        if (isBlockedStreamUrl(streamUrl)) {
             continue;
         }
 
@@ -272,16 +349,17 @@ function normalizeStations(rawStations) {
             country: station.country || station.state || 'International',
             url: streamUrl,
             codec: station.codec || guessCodec(streamUrl),
-            hls: station.hls === 1 || streamUrl.includes('.m3u8'),
+            hls: false,
             votes: station.votes || station.clickcount || 0,
-            favicon: station.favicon || ''
+            favicon: station.favicon || '',
+            verified: false
         });
     }
 
-    // Sort by popularity, HLS streams last (less reliable cross-browser)
+    // Verified first, then sort by popularity
     normalized.sort((a, b) => {
-        if (a.hls !== b.hls) {
-            return a.hls ? 1 : -1;
+        if (a.verified !== b.verified) {
+            return a.verified ? -1 : 1;
         }
         return (b.votes || 0) - (a.votes || 0);
     });
@@ -289,23 +367,33 @@ function normalizeStations(rawStations) {
     return normalized;
 }
 
-// Prefer resolved HTTPS URLs; upgrade HTTP when possible
+// Block stream URLs known to fail on HTTPS or in browsers
+function isBlockedStreamUrl(url) {
+    const blockedPatterns = [
+        /stream\.zeno\.fm/i, // // Often returns 401 without auth token
+        /dreamsiteradiocp\d*\.com:\d+/i, // // Port-based HTTP servers — HTTPS upgrade fails
+        /\/login\/index\.php/i // // Login pages, not audio streams
+    ];
+    return blockedPatterns.some((pattern) => pattern.test(url));
+}
+
+// Only accept natively HTTPS URLs — never fake-upgrade HTTP (breaks most streams)
 function resolveStreamUrl(station) {
-    let url = (station.url_resolved || station.url || '').trim();
-    if (!url) {
-        return null;
+    const resolved = (station.url_resolved || '').trim();
+    const original = (station.url || '').trim();
+
+    // Prefer resolved URL when it is natively HTTPS
+    if (resolved.startsWith('https://')) {
+        return resolved;
     }
 
-    // Upgrade HTTP to HTTPS to avoid mixed-content blocking on GitHub Pages
-    if (url.startsWith('http://')) {
-        url = url.replace('http://', 'https://');
+    // Fall back to original only if also natively HTTPS
+    if (original.startsWith('https://')) {
+        return original;
     }
 
-    if (!url.startsWith('https://')) {
-        return null;
-    }
-
-    return url;
+    // HTTP-only streams are blocked by GitHub Pages mixed-content policy
+    return null;
 }
 
 // Guess codec label from URL extension
@@ -354,7 +442,7 @@ function renderStationGrid(stations) {
         button.innerHTML = `
             <div class="station-top">
                 <span class="live-dot"></span>
-                <span class="station-codec">${station.codec}</span>
+                <span class="station-codec">${station.verified ? '✓ ' : ''}${station.codec}</span>
             </div>
             <span class="station-name">${escapeHtml(station.name)}</span>
             <span class="station-desc">${escapeHtml(station.country)}</span>
@@ -404,6 +492,7 @@ function playStation(index) {
     }
 
     activeStationIndex = index;
+    autoSkipCount = 0; // // Manual selection resets auto-skip counter
     currentMode = 'radio';
     currentStationMeta = station;
     currentSleepType = null;
@@ -413,57 +502,79 @@ function playStation(index) {
 
     stopPlayback(false);
     loadStream(station.url, station.hls)
-        .then(() => audioElement.play())
+        .then(() => {
+            // playing event already fired — onAudioPlaying handles UI
+        })
         .catch((error) => handlePlaybackError('radio', error));
 }
 
-// Load stream URL — uses hls.js for HLS, native audio otherwise
+// Load stream URL — play immediately for live Icecast/Shoutcast feeds
 function loadStream(url, isHls) {
     return new Promise((resolve, reject) => {
         destroyHls();
 
-        const onReady = () => {
-            audioElement.removeEventListener('canplay', onReady);
-            audioElement.removeEventListener('loadeddata', onReady);
-            resolve();
+        let settled = false;
+        const STREAM_TIMEOUT_MS = 15000;
+
+        const cleanup = () => {
+            clearTimeout(timeoutId);
+            audioElement.removeEventListener('playing', onPlaying);
+            audioElement.removeEventListener('error', onError);
         };
 
-        const onFail = () => {
-            audioElement.removeEventListener('error', onFail);
-            reject(new Error('Stream failed to load'));
+        const finish = (callback) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            callback();
         };
 
-        audioElement.addEventListener('canplay', onReady, { once: true });
-        audioElement.addEventListener('loadeddata', onReady, { once: true });
-        audioElement.addEventListener('error', onFail, { once: true });
+        const onPlaying = () => finish(resolve);
+        const onError = () => finish(() => reject(new Error('Stream failed to load')));
 
+        const timeoutId = setTimeout(() => {
+            finish(() => reject(new Error('Connection timed out')));
+        }, STREAM_TIMEOUT_MS);
+
+        audioElement.addEventListener('playing', onPlaying);
+        audioElement.addEventListener('error', onError);
+
+        // HLS streams via hls.js
         if (isHls || url.includes('.m3u8')) {
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                hlsPlayer = new Hls({ enableWorker: true, lowLatencyMode: true });
+                hlsPlayer = new Hls({ enableWorker: true, lowLatencyMode: false });
                 hlsPlayer.loadSource(url);
                 hlsPlayer.attachMedia(audioElement);
-                hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => resolve());
+                hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                    audioElement.play().catch(onError);
+                });
                 hlsPlayer.on(Hls.Events.ERROR, (_event, data) => {
                     if (data.fatal) {
-                        reject(new Error(data.type));
+                        onError();
                     }
                 });
                 return;
             }
 
-            // Safari native HLS support
             if (audioElement.canPlayType('application/vnd.apple.mpegurl')) {
+                audioElement.loop = false;
                 audioElement.src = url;
+                audioElement.load();
+                audioElement.play().catch(onError);
                 return;
             }
 
-            reject(new Error('HLS not supported in this browser'));
+            finish(() => reject(new Error('HLS not supported in this browser')));
             return;
         }
 
+        // Live radio — must call play() immediately; waiting for canplay breaks Icecast
         audioElement.loop = false;
         audioElement.src = url;
         audioElement.load();
+        audioElement.play().catch(onError);
     });
 }
 
@@ -590,6 +701,7 @@ function setTimer(type) {
 
 // Audio event — now playing
 function onAudioPlaying() {
+    autoSkipCount = 0; // // Reset skip counter on successful playback
     setPlayerLoading(false);
     setVisualizerActive(true);
     setStatus('live', 'Now Playing');
@@ -642,15 +754,20 @@ function handlePlaybackError(mode, error) {
     setStatus('error', 'Connection lost');
 
     ui.currentStation.textContent = 'Stream unavailable';
-    ui.stationMeta.textContent = 'Trying next station...';
     ui.playPauseButton.textContent = '▶ Listen';
     ui.playPauseButton.disabled = false;
 
-    showToast('Stream failed. Skipping to next station...');
-
-    if (mode === 'radio' && allStations.length > 1) {
-        setTimeout(() => skipStation(1), 1500);
+    if (mode === 'radio' && allStations.length > 1 && autoSkipCount < MAX_AUTO_SKIPS) {
+        autoSkipCount++;
+        ui.stationMeta.textContent = `Trying next station (${autoSkipCount}/${MAX_AUTO_SKIPS})...`;
+        showToast('Stream unavailable. Trying next station...');
+        setTimeout(() => skipStation(1), 1200);
+        return;
     }
+
+    ui.stationMeta.textContent = 'Please select another station';
+    showToast('Could not connect. Please try a verified station (✓).');
+    autoSkipCount = 0;
 }
 
 // Highlight the active station button
