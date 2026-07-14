@@ -209,7 +209,7 @@ function updateClock() {
 // Fetch stations from multiple API queries and merge results
 async function fetchCatholicStations() {
     showStationLoading(true);
-    setStatus('scanning', 'Scanning frequencies...');
+    setStatus('scanning', 'Tuning in...');
 
     const apiQueries = [
         `${RADIO_BROWSER_API}/stations/search?tag=catholic&limit=40&order=clickcount&reverse=true`,
@@ -242,12 +242,12 @@ async function fetchCatholicStations() {
         allStations = normalizeStations(CURATED_STATIONS);
         setStatus('fallback', 'Using curated stations');
     } else {
-        setStatus('online', `${allStations.length} stations online`);
+        setStatus('online', `${allStations.length} stations found`);
     }
 
     renderStationGrid(allStations);
     showStationLoading(false);
-    ui.stationCount.textContent = `${allStations.length} STATIONS`;
+    ui.stationCount.textContent = `${allStations.length} Stations`;
 }
 
 // Normalize raw API records into consistent station objects
@@ -378,7 +378,7 @@ function renderSleepSounds() {
             <div class="sleep-icon">${sound.icon}</div>
             <h3>${escapeHtml(sound.name)}</h3>
             <p class="sound-desc">${escapeHtml(sound.description)}</p>
-            <button class="sleep-btn" data-type="${type}">Activate</button>
+            <button class="sleep-btn" data-type="${type}">Play Sound</button>
             <div class="timer-control">
                 <input type="number" id="${type}Timer" min="1" max="120" value="30" aria-label="Timer minutes">
                 <button class="timer-btn" data-type="${type}">Set Timer</button>
@@ -513,7 +513,7 @@ function stopPlayback(resetUi = true) {
         setVisualizerActive(false);
         ui.currentStation.textContent = 'Select a station or sleep sound';
         ui.stationMeta.textContent = 'Ready';
-        ui.playPauseButton.textContent = '▶ PLAY';
+        ui.playPauseButton.textContent = '▶ Listen';
         ui.playPauseButton.disabled = false;
         highlightActiveStation();
         highlightActiveSleep(null);
@@ -592,7 +592,7 @@ function setTimer(type) {
 function onAudioPlaying() {
     setPlayerLoading(false);
     setVisualizerActive(true);
-    setStatus('live', 'LIVE');
+    setStatus('live', 'Now Playing');
 
     const label = currentStationMeta
         ? currentStationMeta.name
@@ -602,7 +602,7 @@ function onAudioPlaying() {
     ui.stationMeta.textContent = currentStationMeta
         ? `${currentStationMeta.country} · ${currentStationMeta.codec}`
         : '';
-    ui.playPauseButton.textContent = '⏸ PAUSE';
+    ui.playPauseButton.textContent = '⏸ Pause';
     ui.playPauseButton.disabled = false;
 }
 
@@ -610,8 +610,8 @@ function onAudioPlaying() {
 function onAudioPaused() {
     if (!audioElement.ended) {
         setVisualizerActive(false);
-        setStatus('paused', 'PAUSED');
-        ui.playPauseButton.textContent = '▶ PLAY';
+        setStatus('paused', 'Paused');
+        ui.playPauseButton.textContent = '▶ Listen';
     }
 }
 
@@ -639,11 +639,11 @@ function handlePlaybackError(mode, error) {
     console.error('Playback error:', error);
     setPlayerLoading(false);
     setVisualizerActive(false);
-    setStatus('error', 'SIGNAL LOST');
+    setStatus('error', 'Connection lost');
 
     ui.currentStation.textContent = 'Stream unavailable';
     ui.stationMeta.textContent = 'Trying next station...';
-    ui.playPauseButton.textContent = '▶ PLAY';
+    ui.playPauseButton.textContent = '▶ Listen';
     ui.playPauseButton.disabled = false;
 
     showToast('Stream failed. Skipping to next station...');
@@ -683,7 +683,7 @@ function setPlayerLoading(isLoading, message) {
     ui.playPauseButton.disabled = isLoading;
     if (isLoading && message) {
         ui.currentStation.textContent = message;
-        ui.stationMeta.textContent = 'Establishing connection...';
+        ui.stationMeta.textContent = 'Connecting to stream...';
         setVisualizerActive(false);
     }
 }

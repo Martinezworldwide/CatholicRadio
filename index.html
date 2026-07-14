@@ -8,33 +8,50 @@
     <link rel="stylesheet" href="styles.css">
     <!-- hls.js for HLS (.m3u8) stream support -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Animated background grid -->
-    <div class="bg-grid"></div>
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
+    <!-- Cathedral atmosphere layers -->
+    <div class="cathedral-bg"></div>
+    <div class="stained-light stained-light-left"></div>
+    <div class="stained-light stained-light-right"></div>
+    <div class="vault-overlay"></div>
 
     <div class="container">
+        <!-- Gothic arch header -->
         <header class="site-header">
-            <div class="header-top">
-                <span id="statusBadge" class="status-badge status-scanning">INITIALIZING</span>
+            <div class="rose-window" aria-hidden="true">
+                <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+                    <circle cx="60" cy="60" r="38" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                    <line x1="60" y1="6" x2="60" y2="114" stroke="currentColor" stroke-width="0.8" opacity="0.25"/>
+                    <line x1="6" y1="60" x2="114" y2="60" stroke="currentColor" stroke-width="0.8" opacity="0.25"/>
+                    <line x1="22" y1="22" x2="98" y2="98" stroke="currentColor" stroke-width="0.6" opacity="0.2"/>
+                    <line x1="98" y1="22" x2="22" y2="98" stroke="currentColor" stroke-width="0.6" opacity="0.2"/>
+                    <circle cx="60" cy="60" r="8" fill="currentColor" opacity="0.5"/>
+                </svg>
+            </div>
+
+            <div class="header-meta">
+                <span id="statusBadge" class="status-badge status-scanning">Tuning...</span>
                 <span id="liveClock" class="live-clock">--:--:--</span>
             </div>
-            <h1>
-                <span class="title-accent">◈</span>
-                Catholic Sleep Radio
-                <span class="title-accent">◈</span>
-            </h1>
-            <p class="subtitle">Live Catholic Broadcasts · Ambient Sleep Frequencies</p>
+
+            <div class="gothic-arch-frame">
+                <h1>Catholic Sleep Radio</h1>
+            </div>
+            <p class="subtitle">Live Catholic Broadcasts &amp; Peaceful Rest</p>
+            <div class="header-ornament" aria-hidden="true">✦ ✦ ✦</div>
         </header>
 
-        <main>
-            <!-- High-tech player deck -->
-            <section class="player-section">
+        <main class="nave">
+            <!-- Sanctuary player -->
+            <section class="player-section sanctuary">
+                <div class="column column-left" aria-hidden="true"></div>
                 <div id="player" class="player-deck">
-                    <!-- Audio visualizer bars -->
+                    <p class="sanctuary-label">Sanctuary Player</p>
+
+                    <!-- Candlelight-style visualizer -->
                     <div id="visualizer" class="visualizer" aria-hidden="true">
                         <span></span><span></span><span></span><span></span>
                         <span></span><span></span><span></span><span></span>
@@ -43,35 +60,36 @@
 
                     <div class="now-playing">
                         <span id="currentStation" class="track-title">Select a station or sleep sound</span>
-                        <span id="stationMeta" class="track-meta">Ready</span>
+                        <span id="stationMeta" class="track-meta">Ready to listen</span>
                     </div>
 
                     <div id="timerDisplay" class="timer-display"></div>
 
                     <div class="controls">
-                        <button id="prevButton" class="ctrl-btn" title="Previous station">⏮</button>
-                        <button id="playPauseButton" class="ctrl-btn ctrl-play">▶ PLAY</button>
-                        <button id="nextButton" class="ctrl-btn" title="Next station">⏭</button>
+                        <button id="prevButton" class="ctrl-btn" title="Previous station">◀</button>
+                        <button id="playPauseButton" class="ctrl-btn ctrl-play">▶ Listen</button>
+                        <button id="nextButton" class="ctrl-btn" title="Next station">▶</button>
                     </div>
 
                     <div class="volume-control">
-                        <span class="volume-label">VOL</span>
+                        <span class="volume-label">Volume</span>
                         <input type="range" id="volumeControl" min="0" max="1" step="0.05" value="0.5" aria-label="Volume">
                         <span id="volumeValue" class="volume-value">50%</span>
                     </div>
                 </div>
+                <div class="column column-right" aria-hidden="true"></div>
             </section>
 
-            <!-- Live stations -->
-            <section class="stations-section">
+            <!-- Stations chapel wing -->
+            <section class="stations-section chapel-panel">
                 <div class="section-header">
                     <h2>Live Catholic Radio</h2>
-                    <span id="stationCount" class="station-count">0 STATIONS</span>
+                    <span id="stationCount" class="station-count">0 Stations</span>
                 </div>
 
                 <div class="search-bar">
-                    <span class="search-icon">⌕</span>
-                    <input type="search" id="stationSearch" placeholder="Search stations by name, country, or format..." autocomplete="off">
+                    <span class="search-icon">&#9906;</span>
+                    <input type="search" id="stationSearch" placeholder="Search by name, country, or format..." autocomplete="off">
                 </div>
 
                 <div id="prayerList" class="station-grid">
@@ -79,11 +97,11 @@
                 </div>
             </section>
 
-            <!-- Sleep sounds -->
-            <section class="sleep-section">
+            <!-- Sleep sounds chapel wing -->
+            <section class="sleep-section chapel-panel">
                 <div class="section-header">
-                    <h2>Sleep Frequencies</h2>
-                    <span class="section-tag">AMBIENT · LOOP · TIMER</span>
+                    <h2>Sleep &amp; Prayer Sounds</h2>
+                    <span class="section-tag">Ambient · Loop · Timer</span>
                 </div>
                 <div id="sleepGrid" class="sleep-grid">
                     <!-- Sleep sounds loaded dynamically -->
@@ -91,9 +109,10 @@
             </section>
         </main>
 
-        <footer>
+        <footer class="site-footer">
+            <div class="footer-cross" aria-hidden="true">&#10013;</div>
             <p>For prayer, rest, and peaceful sleep</p>
-            <p class="footer-tech">Powered by Radio Browser API · hls.js · HTML5 Audio</p>
+            <p class="footer-verse">"Be still, and know that I am God." — Psalm 46:10</p>
         </footer>
     </div>
 
